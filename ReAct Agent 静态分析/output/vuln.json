@@ -1,0 +1,5 @@
+{
+  "vuln_type": "stack_buffer_overflow",
+  "location": "main: 0x40130a-0x401382, sink __strcpy_chk at 0x401382",
+  "cause": "不可信标准输入经 fgets 写入栈上 [rsp+0x20] 缓冲区，程序仅用 strlen(input)-1 <= 0x63 作为长度判断，随后把该输入复制到 rsp 处的 0x10 字节目标缓冲区；源数据长度可远大于目标缓冲区，形成栈缓冲区溢出。"
+}

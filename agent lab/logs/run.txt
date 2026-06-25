@@ -1,0 +1,111 @@
+ReAct angr Agent Run
+model: GPT-5.5
+date: 2026-06-13T14:18:29
+target_source: .\src\crackme.c
+
+Thought: 先编译实验要求中的 crackme.c，得到 Agent 后续可交给 angr 分析的目标程序。
+Action: .\tools\john\bin\gcc.exe .\src\crackme.c -o .\crackme.exe -O0 -g
+Observation:
+[exit=0]
+
+Thought: 收集目标中的语义字符串，给 LLM/Agent 明确 find/avoid 目标：倾向格式化字符串成功路径，避开 Wrong payload。
+Action: scan printable strings from .\crackme.exe
+Observation:
+{
+  "interesting_strings": [
+    "Wrong payload!",
+    "Success! Format string path reached.",
+    "Enter format payload: ",
+    "payload",
+    "check_payload",
+    "contains_format",
+    "__format",
+    "mingw_pformat.",
+    "contains_format",
+    "check_payload",
+    "__mingw_sformat",
+    "__pformat_putc",
+    "__pformat_putchars",
+    "__pformat_puts",
+    "__pformat_wputchars",
+    "__pformat_wcputs",
+    "__pformat_int_bufsiz",
+    "__pformat_int",
+    "__pformat_xint",
+    "__pformat_cvt",
+    "__pformat_ecvt",
+    "__pformat_fcvt",
+    "__pformat_emit_radix_point",
+    "__pformat_emit_numeric_value",
+    "__pformat_emit_inf_or_nan",
+    "__pformat_emit_float",
+    "__pformat_emit_efloat",
+    "__pformat_float",
+    "__pformat_efloat",
+    "__pformat_gfloat",
+    "__pformat_emit_xfloat",
+    "__pformat_xldouble",
+    "__pformat_xdouble",
+    "__mingw_pformat"
+  ]
+}
+
+Thought: 加载 angr，构建 CFG，尝试把高层语义目标映射到二进制状态空间。
+Action: angr.Project + CFGFast
+Observation:
+{
+  "arch": "AMD64",
+  "entry": "0x140001125",
+  "function_count": 384,
+  "check_password_addr": "0x140001911",
+  "success_addr": null,
+  "avoid_addr": null
+}
+
+Thought: 使用 angr 符号化 payload 缓冲区，直接调用 check_payload，尝试以返回值为 1 的状态作为成功状态。
+Action: call_state(check_payload, symbolic_buffer) + explore(return rax==1)
+Observation:
+{
+  "solution": "%x",
+  "stats": {
+    "found": 1,
+    "active": 0,
+    "deadended": 0,
+    "stdout": ""
+  }
+}
+
+Thought: Agent 将格式化字符串成功分支谓词交给 angr 依赖的 claripy 约束求解器，生成最短可触发 payload。
+Action: claripy.Solver over success-branch predicates
+Observation:
+{
+  "solution": "%x",
+  "stats": {
+    "constraints": [
+      "payload[0] == '%'",
+      "payload[1] == 'x'",
+      "contains_format(payload) == true",
+      "check_payload(payload) returns 1"
+    ],
+    "solver": "claripy.Solver",
+    "satisfiable": true
+  }
+}
+
+Thought: 输出结构化求解结果，便于批改复现。
+Action: write .\output\solution.json
+Observation:
+{
+  "target": "crackme.exe",
+  "solution": "%x",
+  "expected_output_contains": "Success! Format string path reached.",
+  "react_rounds": 5,
+  "tools": [
+    "compile_target",
+    "discover_strings",
+    "find_success_avoid",
+    "solve_with_angr",
+    "solve_semantic_constraints"
+  ]
+}
+

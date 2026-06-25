@@ -1,0 +1,13 @@
+{
+  "target": "crackme.exe",
+  "solution": "%x",
+  "expected_output_contains": "Success! Format string path reached.",
+  "react_rounds": 5,
+  "tools": [
+    "compile_target",
+    "discover_strings",
+    "find_success_avoid",
+    "solve_with_angr",
+    "solve_semantic_constraints"
+  ]
+}

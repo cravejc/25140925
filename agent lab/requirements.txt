@@ -1,0 +1,29 @@
+# Runtime
+Python 3.11+
+
+# Python libraries used by agent/react_angr_agent.py
+angr==9.2.86
+claripy==9.2.86
+cle==9.2.86
+pyvex==9.2.86
+archinfo==9.2.86
+z3-solver
+
+# Standard-library modules used directly
+json
+logging
+os
+re
+subprocess
+sys
+datetime
+pathlib
+
+# Bundled offline runtime in this submission
+tools\angr-python\python.exe
+
+# Bundled compiler
+tools\john\bin\gcc.exe
+
+# One-click run
+.\run_agent.ps1

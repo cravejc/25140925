@@ -1,0 +1,12 @@
+# Python 3.11+
+# No third-party Python package is required by the Agent.
+
+# Bundled tools under this submission root:
+# tools\r2\bin\radare2.exe
+# tools\r2\bin\rabin2.exe
+# tools\jdk-21\bin\java.exe
+# tools\ghidra_12.1.2_PUBLIC\support\analyzeHeadless.bat
+
+# One-click run:
+# PowerShell:
+# .\run_agent.ps1
